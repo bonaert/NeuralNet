@@ -193,13 +193,11 @@ class NeuralNet:
         grad_weights2 = numpy.dot(transposed_layer1_output, layer2_errors)
         gradient_weights2 = numpy.multiply(grad_weights2, sigmoid_prime_layer2)
 
-        # Todo: check matrix sizes. Do example by hand. See how they should improve. Turn off screen while doing it.
-        grad_bias2 = numpy.multiply(sigmoid_prime_layer2, layer2_errors)
-
         grad_weights1 = numpy.dot(input_data.T, layer1_errors)
         sigmoid_prime_layer1 = self.sigmoid_prime(layer1_net_input)
         gradient_weights1 = numpy.multiply(grad_weights1, sigmoid_prime_layer1)
 
+        grad_bias2 = numpy.multiply(sigmoid_prime_layer2, layer2_errors)
         grad_bias1 = numpy.multiply(sigmoid_prime_layer1, layer1_errors)
 
         # Step 4: change the weights and bias
