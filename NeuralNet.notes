@@ -1,0 +1,33 @@
+Matrices: 2 x 3, "two by three", two rows & 3 columns
+
+# 1 x 2 = (1 x OUTPUT)
+output_layer_errors = -(numpy.mat(result) - layer2_output)
+
+# 1 x 2 = (1 x OUTPUT)
+sigmoid_prime_layer2 = self.sigmoid_prime(layer2_net_input)
+# 1 x 2 = (1 x OUTPUT)
+adjusted_output_layer_errors = numpy.multiply(output_layer_errors, sigmoid_prime_layer2)
+# (1 x 2) * (2 x 2) = (1 x OUTPUT) * (OUTPUT x HIDDEN) = 1 x 2 = (1 x HIDDEN)
+hidden_layer_errors = numpy.dot(adjusted_output_layer_errors, self.matrix_weights2.T)
+
+# Step 3: compute the weight changes for each layer
+# (1 x HIDDEN).T = HIDDEN x 1 = 2 x 1
+transposed_layer1_output = layer1_output.T
+# (HIDDEN x 1) * (1 x OUTPUT) = HIDDEN x OUTPUT = 2 x 2
+grad_weights2 = numpy.dot(transposed_layer1_output, output_layer_errors)
+# multiply(HIDDEN x OUTPUT, OUTPUT) = 2 x 2
+gradient_weights2 = numpy.multiply(grad_weights2, sigmoid_prime_layer2)
+
+# Todo: check matrix sizes. Do example by hand. See how they should improve. Turn off screen while doing it.
+
+grad_weights1 = numpy.dot(input_data.T, hidden_layer_errors)
+sigmoid_prime_layer1 = self.sigmoid_prime(layer1_net_input)
+gradient_weights1 = numpy.multiply(grad_weights1, sigmoid_prime_layer1)
+
+
+---------- Bias --------
+grad_bias2 = numpy.multiply(numpy.multiply(bias2, sigmoid_prime_layer2), transposed_layer_output)
+
+
+Let's do an example:
+
