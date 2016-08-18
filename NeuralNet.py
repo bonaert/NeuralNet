@@ -189,8 +189,7 @@ class NeuralNet:
         layer1_errors = numpy.dot(adjusted_output_layer_errors, self.matrix_weights2.T)
 
         # Step 3: compute the weight changes for each layer
-        transposed_layer1_output = layer1_output.T
-        grad_weights2 = numpy.dot(transposed_layer1_output, layer2_errors)
+        grad_weights2 = numpy.dot(layer1_output.T, layer2_errors)
         gradient_weights2 = numpy.multiply(grad_weights2, sigmoid_prime_layer2)
 
         grad_weights1 = numpy.dot(input_data.T, layer1_errors)
