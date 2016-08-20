@@ -1,6 +1,6 @@
 import json
 import numpy
-import code.utils
+import utils
 from math import exp
 from random import random
 
@@ -82,7 +82,7 @@ class GeneralNeuralNet:
     MAX_LAYER_SIZE = 100
 
     def __init__(self, restore_from_file=False, filename=None,
-                 layer_sizes=None, learning_rate=0.4, momentum = 0.3, data=None):
+                 layer_sizes=None, learning_rate=0.4, momentum=0.3, data=None):
         self.FILE_PATH = filename or "data.txt"
         self.LEARNING_RATE = learning_rate
         self.MOMENTUM = momentum
@@ -91,6 +91,14 @@ class GeneralNeuralNet:
         self.num_matrices = len(layer_sizes) - 1
         self.weights_changes = []
         self.bias_changes = []
+
+        self.inputs = []
+        self.net_inputs = []
+        self.outputs = []
+        self.errors = []
+        self.grad_weights = []
+        self.grad_bias = []
+
         self.set_up_matrices(data, restore_from_file)
 
         self.sigmoid = numpy.vectorize(self._sigmoid_scalar)
@@ -152,12 +160,6 @@ class GeneralNeuralNet:
             self.bias_list.append(numpy_matrix_weights)
             self.matrix_weights_list.append(numpy_bias)
 
-
-            # self.matrix_weights1 = numpy.mat([numpy.array(li) for li in matrix_weights1])
-            # self.matrix_weights2 = numpy.mat([numpy.array(li) for li in matrix_weights2])
-            # self.bias1 = numpy.mat([numpy.array(bias1)])
-            # self.bias2 = numpy.mat([numpy.array(bias2)])
-
     def _sigmoid_scalar(self, x):
         return 1 / (1 + exp(-x))
 
@@ -168,7 +170,7 @@ class GeneralNeuralNet:
     def _initialize_weights_randomly(self):
         self.bias_list = []
         self.matrix_weights_list = []
-        for i in range(self.get_num_layers() - 1):
+        for i in range(self.num_matrices):
             input_size, output_size = self.layer_sizes[i], self.layer_sizes[i + 1]
 
             self.bias_list.append(self._make_random_matrix_with_small_numbers(1, output_size))
@@ -211,51 +213,61 @@ class GeneralNeuralNet:
     def train(self, input_data, result):
         """
         Uses the backpropagation algorithm to improve the weights on the network.
-        :param input_data: the data from the image
-        :param next_layer_result: the correct digit (that should be predicted by the OCR system)
+        :param input_data: the input of the training example
+        :param result: the output of the training example
         """
         input_data = numpy.mat(input_data)
 
         # Step 1: use our current neural network to predict an outcome
-        inputs_list = []
-        layer_results = []
-        layer_net_results_list = []
-        current_state = input_data
+        self.inputs = []
+        self.net_inputs = []
+        self.outputs = []
+
+        current_layer = input_data
         for (weights_matrix, bias) in zip(self.matrix_weights_list, self.bias_list):
-            inputs_list.append(current_state)
-            current_state = numpy.dot(current_state, weights_matrix)
-            current_state += bias
-            layer_net_results_list.append(current_state)
-            current_state = self.sigmoid(current_state)
-            layer_results.append(current_state)
+            self.inputs.append(current_layer)
+            net_input_next_layer = numpy.dot(current_layer, weights_matrix) + bias
+            self.net_inputs.append(net_input_next_layer)
 
-        # Step 2: compute the errors for each layer
-        # dC/dOutput = sum_i(errors_i * sigmoid_prime(z_i) * weight_i) for each node i
-        output_layer_errors = layer_results[-1] - numpy.mat(result)
-        layer_errors_from_end_to_start = [output_layer_errors]
+            current_layer = output = self.sigmoid(net_input_next_layer)
+            self.outputs.append(output)
 
-        next_layer_errors = output_layer_errors
-        for next_matrix_weights, next_layer_net_result in reversed(
-                list(zip(self.matrix_weights_list[1:], layer_net_results_list[1:]))):
-            adjusted_errors = numpy.multiply(next_layer_errors, self.sigmoid_prime(next_layer_net_result))
-            current_layer = numpy.dot(adjusted_errors, next_matrix_weights.T)
-            layer_errors_from_end_to_start.append(current_layer)
-            next_layer_errors = current_layer
+        # Step 2: compute the error term (dE/dOuput) for each layer
+        output_layer_errors = self.outputs[-1] - numpy.mat(result)
 
-        # Step 3: compute the weight changes for each layer
-        grad_weights_list = []
-        for layer_inputs, layer_errors, layer_net_result in zip(inputs_list[::-1], layer_errors_from_end_to_start,
-                                                                layer_net_results_list[::-1]):
-            grad_weights = numpy.dot(layer_inputs.T, layer_errors)
-            gradient_weights = numpy.multiply(grad_weights, self.sigmoid_prime(layer_net_result))
-            grad_weights_list.append(gradient_weights)
+        self.errors = [output_layer_errors]
+        for i in range(self.num_matrices - 1, 0, -1):
+            error_next_layer = self.errors[0]
+            net_input_next_layer = self.net_inputs[i]
+            weights_next_layer = self.matrix_weights_list[i]
 
-        # Step 4: change the weights and bias
-        layer_errors_list = layer_errors_from_end_to_start[::-1]
-        grad_weights_list = grad_weights_list[::-1]
-        for (i, gradient_weights_on_cost) in enumerate(grad_weights_list):
-            self.matrix_weights_list[i] -= self.LEARNING_RATE * gradient_weights_on_cost
-            self.bias_list[i] -= self.LEARNING_RATE * layer_errors_list[i]
+            sigmoid_prime_next_layer = self.sigmoid_prime(net_input_next_layer)
+            adjusted_next_layer_errors = numpy.multiply(error_next_layer, sigmoid_prime_next_layer)
+            error_current_layer = numpy.dot(adjusted_next_layer_errors, weights_next_layer.T)
+            self.errors.insert(0, error_current_layer)
+
+        # Step 3: compute the gradient of the weights (and bias) on the error
+        self.grad_weights = []
+        self.grad_bias = []
+
+        for i in range(self.num_matrices - 1, -1, -1):
+            errors = self.errors[i]
+            net_input = self.net_inputs[i]
+            input = self.inputs[i]
+
+            grad_weights = numpy.dot(input.T, errors)
+            sigmoid_prime_layer = self.sigmoid_prime(net_input)
+
+            gradient_weights = numpy.multiply(grad_weights, sigmoid_prime_layer)
+            gradient_bias = numpy.multiply(sigmoid_prime_layer, errors)
+
+            self.grad_bias.insert(0, gradient_bias)
+            self.grad_weights.insert(0, gradient_weights)
+
+        # Step 4: update the weights
+        for i in range(self.num_matrices):
+            self.matrix_weights_list[i] -= self.LEARNING_RATE * self.grad_weights[i]
+            self.bias_list[i] -= self.LEARNING_RATE * self.grad_bias[i]
 
         # Step 5: Add momentum
         if self.weights_changes:
@@ -263,11 +275,8 @@ class GeneralNeuralNet:
                 self.matrix_weights_list[i] -= self.MOMENTUM * self.weights_changes[i]
                 self.bias_list[i] -= self.MOMENTUM * self.bias_changes[i]
 
-        self.weights_changes = grad_weights_list
-        self.bias_changes = layer_errors_list
-
-
-
+        self.weights_changes = self.grad_weights
+        self.bias_changes = self.grad_bias
 
     def save_data(self):
         data = {
@@ -290,7 +299,7 @@ class GeneralNeuralNet:
             f.write(json.dumps(data))
 
     def retrieve_data(self):
-        if code.utils.file_exists(self.FILE_PATH):
+        if utils.file_exists(self.FILE_PATH):
             with open(self.FILE_PATH) as f:
                 try:
                     return json.load(f)
