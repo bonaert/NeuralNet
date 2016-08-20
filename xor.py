@@ -8,9 +8,9 @@ data = {
     (1, 1): 0
 }
 
-TRAINING_SAMPLES = 20000
+TRAINING_SAMPLES = 10000
 
-network = NeuralNet(input_size=2, hidden_layer_size=3, output_size=1, learning_rate=0.75)
+network = NeuralNet(input_size=2, hidden_layer_size=3, output_size=1, learning_rate=0.75, momentum=0.4)
 
 # Step 1: training
 samples = list(data.items())
