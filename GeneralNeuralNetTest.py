@@ -1,5 +1,5 @@
 import unittest
-from code.GeneralNeuralNet import GeneralNeuralNet
+from GeneralNeuralNet import GeneralNeuralNet
 
 
 class MyTestCase(unittest.TestCase):
