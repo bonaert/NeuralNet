@@ -82,10 +82,15 @@ class GeneralNeuralNet:
     MAX_LAYER_SIZE = 100
 
     def __init__(self, restore_from_file=False, filename=None,
-                 layer_sizes=None, learning_rate=0.4, data=None):
+                 layer_sizes=None, learning_rate=0.4, momentum = 0.3, data=None):
         self.FILE_PATH = filename or "data.txt"
         self.LEARNING_RATE = learning_rate
+        self.MOMENTUM = momentum
         self.layer_sizes = layer_sizes
+
+        self.num_matrices = len(layer_sizes) - 1
+        self.weights_changes = []
+        self.bias_changes = []
         self.set_up_matrices(data, restore_from_file)
 
         self.sigmoid = numpy.vectorize(self._sigmoid_scalar)
@@ -251,6 +256,18 @@ class GeneralNeuralNet:
         for (i, gradient_weights_on_cost) in enumerate(grad_weights_list):
             self.matrix_weights_list[i] -= self.LEARNING_RATE * gradient_weights_on_cost
             self.bias_list[i] -= self.LEARNING_RATE * layer_errors_list[i]
+
+        # Step 5: Add momentum
+        if self.weights_changes:
+            for i in range(self.num_matrices):
+                self.matrix_weights_list[i] -= self.MOMENTUM * self.weights_changes[i]
+                self.bias_list[i] -= self.MOMENTUM * self.bias_changes[i]
+
+        self.weights_changes = grad_weights_list
+        self.bias_changes = layer_errors_list
+
+
+
 
     def save_data(self):
         data = {
