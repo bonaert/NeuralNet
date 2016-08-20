@@ -81,8 +81,9 @@ Therefore, hidden_errors = (output_errors * weights.T) x sigmoid_prime(output_la
 
 class NeuralNet:
     def __init__(self, restore_from_file=False, filename=None,
-                 input_size=20 * 20, hidden_layer_size=20, output_size=10, learning_rate=0.1,
+                 input_size=20 * 20, hidden_layer_size=20, output_size=10, learning_rate=0.1, momentum=0.3,
                  data=None, correct_digit_for_data=None, training_indices=None):
+        self.MOMENTUM = momentum
         self.FILE_PATH = filename or "data.txt"
         self.LEARNING_RATE = learning_rate
         self.INPUT_SIZE = input_size
@@ -93,6 +94,7 @@ class NeuralNet:
         self._initialize_matrices(restore_from_file)
         self.sigmoid = numpy.vectorize(self._sigmoid_scalar)
         self.sigmoid_prime = numpy.vectorize(self._sigmoid_prime_scalar)
+        self.changes = []
 
 
         if (not os.path.isfile(self.FILE_PATH) or not restore_from_file):
@@ -204,6 +206,14 @@ class NeuralNet:
         self.matrix_weights1 -= self.LEARNING_RATE * gradient_weights1
         self.bias2 -= self.LEARNING_RATE * grad_bias2
         self.bias1 -= self.LEARNING_RATE * grad_bias1
+
+        if len(self.changes) > 0:
+            self.matrix_weights2 -= self.MOMENTUM * self.changes[0]
+            self.matrix_weights1 -= self.MOMENTUM * self.changes[1]
+            self.bias2 -= self.MOMENTUM * self.changes[2]
+            self.bias1 -= self.MOMENTUM * self.changes[3]
+
+        self.changes = [gradient_weights2, gradient_weights1, grad_bias2, grad_bias1]
 
         self.epochs += 1
 
