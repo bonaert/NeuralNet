@@ -12,7 +12,7 @@ At the end, you'll know the precise maths required to make the neural net work.
 
 # The Neural Net Code
 
-* A simple [2 layer Neural Net](https://github.com/harokb/NeuralNet/blob/master/NeuralNet.py) (to start learning), then a [n-layer Neural Net](https://github.com/harokb/NeuralNet/blob/master/GeneralNeuralNet.py), with prediction and training, using the classical backpropagation algorithm (with momentum)
+* A simple [2 layer Neural Net](https://github.com/bonaert/NeuralNet/blob/master/NeuralNet.py) (to start learning), then a [n-layer Neural Net](https://github.com/harokb/NeuralNet/blob/master/GeneralNeuralNet.py), with prediction and training, using the classical backpropagation algorithm (with momentum)
 
 # Examples and applications
 
