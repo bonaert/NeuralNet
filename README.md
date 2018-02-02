@@ -4,9 +4,11 @@ Want to understand how neural nets works, and see a clear implementation? I did,
 
 # Blog posts with explanations
 
-This repository is the companion to my [blog posts about learning how neural networks work and learn](http://www.gregbonaert.com/starter-guide-to-neural-networks-part-1/). There I write the theory behind them, and the maths in the clearest way I could. I don't oversimplify things or make things too vague. 
+This repository is the companion to my [blog posts about learning how neural networks work and learn](http://blog.gregbonaert.com/starter-guide-to-neural-networks-part-1/). There I write the theory behind them, and the maths in the clearest way I could. I don't oversimplify things or make things too vague. 
 
 At the end, you'll know the precise maths required to make the neural net work.
+
+![The structure of the simplest neural network](http://blog.gregbonaert.com/wp-content/uploads/2016/08/NeuralNetSimple-300x205.jpeg)
 
 # The Neural Net Code
 
