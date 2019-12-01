@@ -1,6 +1,8 @@
 # NeuralNet
 
-Want to understand how neural nets works, and see a clear implementation? I did, which is why I created this simple and (hopefully) clear implementation of a neural network. It greatly improved my understanding of how they work.
+**Note:** this is an old repository I created when I was first learning about neural network and wanted to be sure I understood them well. Given the current popularity of Neural Networks, if want to learn then you're in luck because there are tons of amazing educational resources (such as Michael Nielsen's [Neural networks and Deep Learning](http://neuralnetworksanddeeplearning.com/) or the [Deep Learning book](http://www.deeplearningbook.org/) by Goodfellow, Bengio and Courville) and great frameworks to play with, such as [Tensorflow](https://www.tensorflow.org/), [Keras](https://keras.io/) or [PyTorch](https://pytorch.org/).
+
+Want to understand how neural nets work, and see a simple implementation? I did, which is why I created this simple and (hopefully) clear implementation of a neural network. It greatly improved my understanding of how they work.
 
 # Blog posts with explanations
 
